@@ -65,4 +65,5 @@ This system was originally developed as an academic course project focusing on t
    * `git commit -m "Added README, description, and gitignore"`
    * `git push`
 
-Streamlit will automatically see these new files and update your live app!
+Streamlit will automatically see these new files and update your live app! 
+ 
