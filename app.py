@@ -14,12 +14,12 @@ st.set_page_config(
 )
 
 # -----------------------------
-# CLEAN PROFESSIONAL UI
+# UI STYLING (FULL FIX)
 # -----------------------------
 st.markdown("""
 <style>
 
-/* Background */
+/* App background */
 .stApp {
     background-color: #f5f7fb;
 }
@@ -29,72 +29,109 @@ html, body, [class*="css"] {
     color: #0f172a !important;
 }
 
-/* Button */
-.stButton > button {
-    background-color: #2563eb;
-    color: white !important;
-    border-radius: 10px;
-    padding: 10px 18px;
-    font-size: 16px;
-    border: none;
-    transition: 0.2s ease-in-out;
+/* Headings */
+h1, h2, h3, p {
+    color: #0f172a !important;
 }
 
+/* =========================
+   PREDICT BUTTON (BLUE)
+========================= */
+.stButton > button {
+    background-color: #1d4ed8 !important;
+    color: #ffffff !important;
+    border: 2px solid #1d4ed8 !important;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.15);
+}
+
+/* Predict hover */
 .stButton > button:hover {
-    background-color: #1d4ed8;
-    transform: scale(1.02);
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+    transform: scale(1.03);
+}
+
+/* Fix internal text */
+.stButton > button p {
+    color: #ffffff !important;
+}
+
+/* =========================
+   DOWNLOAD BUTTON (GREEN)
+========================= */
+.stDownloadButton > button {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+    border: 2px solid #16a34a !important;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.15);
+}
+
+/* Download hover */
+.stDownloadButton > button:hover {
+    background-color: #22c55e !important;
+    border-color: #22c55e !important;
+    color: #ffffff !important;
+    transform: scale(1.03);
+}
+
+/* Fix download text */
+.stDownloadButton > button p {
+    color: #ffffff !important;
 }
 
 /* File uploader */
 div[data-testid="stFileUploader"] {
-    background-color: white;
+    background-color: #ffffff;
     padding: 15px;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
 }
 
-/* Metrics */
-[data-testid="metric-container"] {
-    background-color: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
-}
-
 /* Dataframe */
 .stDataFrame {
-    background-color: white;
+    background-color: #ffffff;
     border-radius: 10px;
 }
 
-/* Remove weird white-on-white issues */
-h1, h2, h3, p {
-    color: #0f172a !important;
+/* Metrics */
+[data-testid="metric-container"] {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# PROFESSIONAL HEADING
+# HEADER (PROFESSIONAL)
 # -----------------------------
 st.markdown("""
 <h1 style="
     text-align:center;
-    font-weight:900;
     font-size:36px;
-    margin-bottom:5px;
-    color:#0f172a;">
+    font-weight:900;
+    color:#0f172a;
+    margin-bottom:5px;">
     🦟 Dengue Infection Risk Prediction System
 </h1>
 
 <p style="
     text-align:center;
     font-size:16px;
-    color:#475569;
-    margin-top:0px;">
-    Machine Learning–Based Clinical Decision Support Tool Using Complete Blood Count (CBC) Parameters<br>
-    for Early Detection and Risk Stratification of Dengue Infection
+    color:#475569;">
+    Machine Learning–Based Clinical Decision Support Tool using Complete Blood Count (CBC) parameters<br>
+    for early detection and risk classification of Dengue infection
 </p>
 """, unsafe_allow_html=True)
 
@@ -144,13 +181,12 @@ if model is None:
 uploaded_file = st.file_uploader("Upload CBC CSV File", type=["csv"])
 
 # -----------------------------
-# PROCESS & PREDICT
+# PROCESS + PREDICT
 # -----------------------------
 if uploaded_file is not None:
 
     df = pd.read_csv(uploaded_file)
 
-    # Remove unwanted columns
     drop_cols = ["Serial", "Date", "Result"]
     df.drop(columns=[c for c in drop_cols if c in df.columns], inplace=True)
 
@@ -164,14 +200,12 @@ if uploaded_file is not None:
         })
         df.drop(columns=["Gender"], inplace=True)
 
-    # Validate columns
     missing = [col for col in FEATURES if col not in df.columns]
 
     if missing:
         st.error(f"Missing required columns: {missing}")
         st.stop()
 
-    # Fill missing values
     for col in FEATURES:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(MEDIANS[col])
 
@@ -196,32 +230,31 @@ if uploaded_file is not None:
             ]
         })
 
-        # Results table
         st.subheader("📊 Prediction Results")
         st.dataframe(results, use_container_width=True)
 
         # -----------------------------
-        # SUMMARY DASHBOARD
+        # SUMMARY
         # -----------------------------
         positive = int(preds.sum())
         negative = len(preds) - positive
 
-        st.subheader("📌 Patient Summary Overview")
+        st.subheader("📌 Summary")
 
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Patients", len(preds))
-        col2.metric("High Risk Cases", positive)
-        col3.metric("Low Risk Cases", negative)
+        col2.metric("High Risk", positive)
+        col3.metric("Low Risk", negative)
 
         # -----------------------------
-        # DOWNLOAD
+        # DOWNLOAD BUTTON
         # -----------------------------
         csv = results.to_csv(index=False).encode("utf-8")
 
         st.download_button(
-            "⬇ Download Prediction Report",
+            "⬇ Download Report",
             csv,
-            "dengue_risk_report.csv",
+            "dengue_results.csv",
             "text/csv"
         )
 
@@ -229,4 +262,4 @@ if uploaded_file is not None:
 # FOOTER
 # -----------------------------
 st.markdown("---")
-st.caption("⚠ For research and educational purposes only. Not a substitute for medical diagnosis.")
+st.caption("⚠ Research purpose only — Not a medical diagnosis tool")
