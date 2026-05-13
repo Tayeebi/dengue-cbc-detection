@@ -3,19 +3,19 @@ import joblib
 import numpy as np
 import os
 
-# -----------------------------
+# =========================================================
 # PAGE CONFIG
-# -----------------------------
+# =========================================================
 st.set_page_config(
-    page_title="Dengue Risk AI System",
-    page_icon="🦟",
+    page_title="DengueAI",
+    page_icon="🧬",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# -----------------------------
+# =========================================================
 # LOAD MODEL
-# -----------------------------
+# =========================================================
 @st.cache_resource
 def load_model():
     model_path = "dengue_pipeline.pkl"
@@ -26,388 +26,339 @@ def load_model():
 model = load_model()
 
 if model is None:
-    st.error("Model file not found: dengue_pipeline.pkl")
+    st.error("❌ Model file not found: dengue_pipeline.pkl")
     st.stop()
 
-# -----------------------------
-# PREDICTION
-# -----------------------------
+# =========================================================
+# PREDICTION FUNCTION
+# =========================================================
 def predict_dengue(input_data):
     X = np.array([input_data], dtype=float)
     prediction = int(model.predict(X)[0])
     probability = float(model.predict_proba(X)[0][1])
     return prediction, probability
 
-# -----------------------------
-# UI STYLES
-# -----------------------------
-st.markdown(
-    """
-    <style>
-    :root{
-        --bg: #f6f8fc;
-        --card: #ffffff;
-        --text: #0f172a;
-        --muted: #64748b;
-        --border: #e5e7eb;
-        --blue: #2563eb;
-        --blue-hover: #1d4ed8;
-        --green: #16a34a;
-        --green-hover: #15803d;
-        --red-bg: #fef2f2;
-        --red-border: #fecaca;
-        --green-bg: #ecfdf5;
-        --green-border: #bbf7d0;
-    }
+# =========================================================
+# CUSTOM CSS
+# =========================================================
+st.markdown("""
+<style>
+/* =========================================================
+BACKGROUND
+========================================================= */
+.stApp {
+    background-color: #f8fafc;
+}
 
-    .stApp {
-        background: var(--bg);
-        color: var(--text);
-    }
+/* =========================================================
+MAIN CONTAINER
+========================================================= */
+.block-container {
+    max-width: 900px;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+}
 
-    .block-container {
-        max-width: 980px;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
+/* =========================================================
+GLOBAL TEXT
+========================================================= */
+html, body, [class*="css"] {
+    color: #0f172a !important;
+}
 
-    html, body, [class*="css"] {
-        color: var(--text) !important;
-    }
+h1, h2, h3, h4, h5, h6, p, span, label {
+    color: #0f172a !important;
+}
 
-    h1, h2, h3, h4, p, label, div {
-        color: var(--text);
-    }
+/* =========================================================
+SIMPLE HERO SECTION
+========================================================= */
+.hero {
+    padding: 6rem 0 2rem 0; 
+    margin-bottom: 2rem;
+    text-align: center;
+}
 
-    .hero {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 22px;
-        padding: 1.7rem 1.5rem 1.4rem 1.5rem;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
-        margin-bottom: 1.2rem;
-    }
+.hero-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    color: #0f172a !important;
+}
 
-    .hero-title {
-        text-align: center;
-        font-size: 2.05rem;
-        line-height: 1.15;
-        font-weight: 900;
-        color: var(--text);
-        margin: 0;
-    }
+.hero-subtitle {
+    color: #475569 !important;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 700px;
+    margin: 0 auto;
+}
 
-    .hero-subtitle {
-        text-align: center;
-        font-size: 1rem;
-        line-height: 1.65;
-        color: var(--muted);
-        margin-top: 0.75rem;
-    }
+/* =========================================================
+SECTION TITLES
+========================================================= */
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: #1e293b !important;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 0.8rem;
+}
 
-    [data-testid="stForm"] {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 1.5rem;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
-        margin-bottom: 1rem;
-    }
+.subtext {
+    color: #64748b !important;
+    margin-top: 0.8rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
 
-    .section-title {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--text);
-        margin-bottom: 0.4rem;
-    }
+/* =========================================================
+BUTTONS
+========================================================= */
+.stButton > button,
+div[data-testid="stFormSubmitButton"] button {
+    width: 100% !important;
+    background: #2563eb !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0px 4px 14px rgba(37,99,235,0.25);
+    transition: all 0.2s ease !important;
+    margin-top: 1rem;
+}
 
-    .subtle {
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
+.stButton > button:hover,
+div[data-testid="stFormSubmitButton"] button:hover {
+    background: #1d4ed8 !important;
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 20px rgba(37,99,235,0.3);
+}
 
-    /* -----------------------------
-       BUTTONS
-    ----------------------------- */
-    .stButton > button,
-    .stDownloadButton > button,
-    div[data-testid="stFormSubmitButton"] button {
-        width: 100% !important;
-        background: var(--blue) !important;
-        color: #ffffff !important;
-        border: 1px solid var(--blue) !important;
-        border-radius: 14px !important;
-        padding: 0.88rem 1rem !important;
-        font-size: 1rem !important;
-        font-weight: 900 !important;
-        line-height: 1.2 !important;
-        letter-spacing: 0.2px !important;
-        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.16) !important;
-        transition: all 0.18s ease-in-out !important;
-        text-shadow: none !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        opacity: 1 !important;
-    }
+/* FORCE BUTTON TEXT VISIBILITY */
+.stButton > button *,
+div[data-testid="stFormSubmitButton"] button * {
+    color: white !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
+}
 
-    .stButton > button:hover,
-    .stDownloadButton > button:hover,
-    div[data-testid="stFormSubmitButton"] button:hover {
-        background: var(--blue-hover) !important;
-        border-color: var(--blue-hover) !important;
-        color: #ffffff !important;
-        transform: translateY(-1px) !important;
-    }
+/* =========================================================
+INPUT LABELS
+========================================================= */
+div[data-testid="stNumberInput"] label,
+div[data-testid="stSelectbox"] label {
+    font-weight: 600 !important;
+    color: #334155 !important;
+    font-size: 0.9rem !important;
+}
 
-    .stButton > button *,
-    .stDownloadButton > button *,
-    div[data-testid="stFormSubmitButton"] button * {
-        color: #ffffff !important;
-        fill: #ffffff !important;
-        opacity: 1 !important;
-        font-weight: 900 !important;
-    }
+/* =========================================================
+RESULT BOX
+======================================================== */
+.result-good {
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    padding: 1.2rem;
+    color: #065f46;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
 
-    /* Inputs */
-    div[data-testid="stNumberInput"] label,
-    div[data-testid="stSelectbox"] label {
-        font-weight: 700 !important;
-        color: var(--text) !important;
-    }
+.result-bad {
+    background: #fef2f2;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 1.2rem;
+    color: #991b1b;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
 
-    div[data-testid="stNumberInput"] input {
-        border-radius: 12px !important;
-    }
+/* =========================================================
+CONFIDENCE
+======================================================== */
+.confidence {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
 
-    div[data-testid="stSelectbox"] > div {
-        border-radius: 12px !important;
-    }
+/* =========================================================
+FOOTER
+========================================================= */
+.footer {
+    text-align: center;
+    color: #94a3b8;
+    margin-top: 3rem;
+    font-size: 0.85rem;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+}
 
-    /* -----------------------------
-       FIX: DROP-DOWN TEXT VISIBILITY (ALL STATES)
-    ----------------------------- */
-    /* Forces the selected value to be white, overriding WebKit defaults */
-    div[data-baseweb="select"],
-    div[data-baseweb="select"] *,
-    div[data-baseweb="select"] span,
-    div[data-baseweb="select"] div {
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
-    }
-    
-    /* Forces the expanded dropdown list to be white */
-    div[data-baseweb="popover"],
-    div[data-baseweb="popover"] *,
-    ul[role="listbox"] li span,
-    li[role="option"] span {
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
-    }
-    /* ----------------------------- */
+/* =========================================================
+PROGRESS BAR
+========================================================= */
+.stProgress > div > div > div {
+    border-radius: 999px;
+}
 
-    /* Result cards */
-    .result-positive {
-        background: var(--red-bg);
-        border: 1px solid var(--red-border);
-        border-radius: 18px;
-        padding: 1rem;
-        color: #991b1b;
-        font-size: 1rem;
-        line-height: 1.65;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+/* =========================================================
+REMOVE EXTRA GAPS
+========================================================= */
+div[data-testid="stVerticalBlock"] {
+    gap: 0.5rem !important;
+}
 
-    .result-negative {
-        background: var(--green-bg);
-        border: 1px solid var(--green-border);
-        border-radius: 18px;
-        padding: 1rem;
-        color: #166534;
-        font-size: 1rem;
-        line-height: 1.65;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+.element-container {
+    margin-top: 0 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    .confidence {
-        margin-top: 0.5rem;
-        color: #334155;
-        font-size: 1rem;
-        line-height: 1.7;
-    }
-
-    .prob-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        padding: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .prob-row {
-        margin-top: 0.75rem;
-        margin-bottom: 0.35rem;
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        font-weight: 800;
-        color: #1f2937;
-        font-size: 0.98rem;
-    }
-
-    .footer-note {
-        text-align: center;
-        color: var(--muted);
-        font-size: 0.9rem;
-        margin-top: 2rem;
-    }
-
-    .stProgress > div > div > div {
-        border-radius: 999px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# -----------------------------
-# HEADER
-# -----------------------------
-st.markdown(
-    """
-    <div class="hero">
-        <div class="hero-title">🦟 Dengue Infection Risk Prediction System</div>
-        <div class="hero-subtitle">
-            A simple, professional clinical web app that predicts dengue risk using Complete Blood Count (CBC) parameters
-            and presents the result in a clean, easy-to-read format.
-        </div>
+# =========================================================
+# HEADER (SIMPLE DESIGN)
+# =========================================================
+st.markdown("""
+<div class="hero">
+    <div class="hero-title">
+        DengueAI: Clinical Decision Support
     </div>
-    """,
-    unsafe_allow_html=True
-)
+    <div class="hero-subtitle">
+        AI-powered risk stratification utilizing complete blood count (CBC) laboratory parameters.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# -----------------------------
-# INPUT FORM
-# -----------------------------
-with st.form("dengue_form", clear_on_submit=False):
-    st.markdown('<div class="section-title">Patient Information</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtle">Enter the patient’s CBC values and basic details below.</div>', unsafe_allow_html=True)
+# =========================================================
+# INPUT HEADER
+# =========================================================
+st.markdown("""
+<div class="section-title">
+    Patient Data Entry
+</div>
+<div class="subtext">
+    Please input the patient's current CBC laboratory results to assess infection risk.
+</div>
+""", unsafe_allow_html=True)
 
+# =========================================================
+# FORM
+# =========================================================
+with st.form("dengue_form"):
     col1, col2 = st.columns(2)
 
+    # LEFT COLUMN
     with col1:
-        age = st.number_input("Age", min_value=0, max_value=120, value=30, step=1)
-        haemoglobin = st.number_input("Haemoglobin", min_value=0.0, max_value=25.0, value=13.0, step=0.1, format="%.1f")
-        esr = st.number_input("ESR", min_value=0.0, max_value=200.0, value=16.0, step=0.1, format="%.1f")
-        wbc = st.number_input("WBC", min_value=0.0, max_value=100.0, value=6.3, step=0.1, format="%.1f")
-        neutrophil = st.number_input("Neutrophil", min_value=0.0, max_value=100.0, value=58.0, step=0.1, format="%.1f")
-        lymphocyte = st.number_input("Lymphocyte", min_value=0.0, max_value=100.0, value=33.0, step=0.1, format="%.1f")
+        age = st.number_input("Age", min_value=0, max_value=120, value=30)
+        haemoglobin = st.number_input("Haemoglobin", min_value=0.0, max_value=25.0, value=13.0)
+        esr = st.number_input("ESR", min_value=0.0, max_value=200.0, value=16.0)
+        wbc = st.number_input("WBC", min_value=0.0, max_value=100.0, value=6.3)
+        neutrophil = st.number_input("Neutrophil", min_value=0.0, max_value=100.0, value=58.0)
+        lymphocyte = st.number_input("Lymphocyte", min_value=0.0, max_value=100.0, value=33.0)
 
+    # RIGHT COLUMN
     with col2:
-        monocyte = st.number_input("Monocyte", min_value=0.0, max_value=100.0, value=6.0, step=0.1, format="%.1f")
-        eosinophil = st.number_input("Eosinophil", min_value=0.0, max_value=100.0, value=2.0, step=0.1, format="%.1f")
-        basophil = st.number_input("Basophil", min_value=0.0, max_value=20.0, value=0.0, step=0.1, format="%.1f")
-        rbc = st.number_input("RBC", min_value=0.0, max_value=15.0, value=4.77, step=0.01, format="%.2f")
-        platelets = st.number_input("Platelets", min_value=0.0, max_value=1000.0, value=70.0, step=0.1, format="%.1f")
+        monocyte = st.number_input("Monocyte", min_value=0.0, max_value=100.0, value=6.0)
+        eosinophil = st.number_input("Eosinophil", min_value=0.0, max_value=100.0, value=2.0)
+        basophil = st.number_input("Basophil", min_value=0.0, max_value=20.0, value=0.0)
+        rbc = st.number_input("RBC", min_value=0.0, max_value=15.0, value=4.77)
+        platelets = st.number_input("Platelets", min_value=0.0, max_value=1000.0, value=70.0)
         gender = st.selectbox("Gender", ["Male", "Female"])
 
-    submitted = st.form_submit_button("🔍 Predict Dengue Risk")
+    submitted = st.form_submit_button("Run Risk Assessment")
 
-# -----------------------------
-# PREDICTION
-# -----------------------------
-gender_val = 1 if gender == "Male" else 0
+# =========================================================
+# INPUT PREPARATION
+# =========================================================
+gender_value = 1 if gender == "Male" else 0
 
 input_data = [
-    age,
-    haemoglobin,
-    esr,
-    wbc,
-    neutrophil,
-    lymphocyte,
-    monocyte,
-    eosinophil,
-    basophil,
-    rbc,
-    platelets,
-    gender_val
+    age, haemoglobin, esr, wbc, neutrophil, 
+    lymphocyte, monocyte, eosinophil, basophil, 
+    rbc, platelets, gender_value
 ]
 
+# =========================================================
+# PREDICTION RESULT
+# =========================================================
 if submitted:
-    X = np.array([input_data], dtype=float)
-    prediction = int(model.predict(X)[0])
-    probability = float(model.predict_proba(X)[0][1])
+    prediction, probability = predict_dengue(input_data)
 
-    st.markdown('<div class="section-title" style="margin-top: 1rem;">🔎 Prediction Result</div>', unsafe_allow_html=True)
+    st.markdown("""
+<div class="section-title" style="margin-top: 2rem;">
+    Assessment Results
+</div>
+    """, unsafe_allow_html=True)
 
+    # POSITIVE
     if prediction == 1:
-        st.markdown(
-            f"""
-            <div class="result-positive">
-                ⚠️ DengueAI suggests you may be at <strong>HIGH RISK of Dengue infection</strong>
-                based on the current data.
-                <div class="confidence">
-                    <strong>Model Confidence:</strong> {probability * 100:.2f}% chance of Dengue infection.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown("""
+<div class="result-bad">
+    ⚠️ <strong>Alert: High Risk of Dengue Infection Detected</strong><br>
+    The model indicates a high probability of Dengue based on the provided CBC hematology profile.
+</div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div class="confidence">
+    <strong>Diagnostic Confidence:</strong>
+    {probability * 100:.1f}% probability of Dengue indicators.
+</div>
+        """, unsafe_allow_html=True)
+
+    # NEGATIVE
     else:
-        st.markdown(
-            f"""
-            <div class="result-negative">
-                ✅ DengueAI suggests you are <strong>not at risk of Dengue infection</strong>
-                based on the current data.
-                <div class="confidence">
-                    <strong>Model Confidence:</strong> {(1 - probability) * 100:.2f}% chance of being healthy.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown("""
+<div class="result-good">
+    ✅ <strong>Low Risk: No Dengue Indicators Detected</strong><br>
+    The model indicates the patient is currently at a low risk of Dengue based on the provided CBC hematology profile.
+</div>
+        """, unsafe_allow_html=True)
 
-    st.markdown('<div class="prob-card">', unsafe_allow_html=True)
-    st.markdown("**📊 Prediction Probabilities**")
+        st.markdown(f"""
+<div class="confidence">
+    <strong>Diagnostic Confidence:</strong>
+    {(1 - probability) * 100:.1f}% probability of negative indicators.
+</div>
+        """, unsafe_allow_html=True)
 
-    not_dengue = max(0.0, min(1.0, 1 - probability))
-    dengue = max(0.0, min(1.0, probability))
+    # =========================================================
+    # PROBABILITIES (Wrapper removed)
+    # =========================================================
+    st.markdown("""
+<div class="section-title" style="border:none; padding:0; font-size:1.1rem; margin-top: 1rem;">
+    Statistical Breakdown
+</div>
+    """, unsafe_allow_html=True)
 
-    st.markdown(
-        f"""
-        <div class="prob-row">
-            <span>Not Dengue</span>
-            <span>{not_dengue * 100:.2f}%</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.progress(not_dengue)
+    healthy_prob = 1 - probability
+    dengue_prob = probability
 
-    st.markdown(
-        f"""
-        <div class="prob-row" style="margin-top:1.5rem;">
-            <span>Dengue</span>
-            <span>{dengue * 100:.2f}%</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.progress(dengue)
+    st.write(f"**Negative for Dengue:** {healthy_prob * 100:.1f}%")
+    st.progress(float(healthy_prob))
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.write(f"**Positive for Dengue:** {dengue_prob * 100:.1f}%")
+    st.progress(float(dengue_prob))
 
-# -----------------------------
+
+# =========================================================
 # FOOTER
-# -----------------------------
-st.markdown(
-    """
-    <div class="footer-note">
-        Research purpose only. Not a medical diagnosis tool.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# =========================================================
+st.markdown("""
+<div class="footer">
+    For investigational and research purposes only. This tool does not replace professional medical diagnosis.
+</div>
+""", unsafe_allow_html=True)
