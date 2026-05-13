@@ -8,7 +8,7 @@ import os
 # PAGE CONFIG
 # -----------------------------
 st.set_page_config(
-    page_title="Dengue Detection",
+    page_title="Dengue Risk AI System",
     page_icon="🦟",
     layout="centered"
 )
@@ -19,29 +19,17 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* App background */
+/* Background */
 .stApp {
     background-color: #f5f7fb;
 }
 
-/* Force readable text everywhere */
+/* Global text */
 html, body, [class*="css"] {
-    color: #111827 !important;
+    color: #0f172a !important;
 }
 
-/* Title */
-h1 {
-    color: #111827 !important;
-    font-weight: 800;
-    text-align: center;
-}
-
-/* Sub text */
-p {
-    color: #374151 !important;
-}
-
-/* Button styling */
+/* Button */
 .stButton > button {
     background-color: #2563eb;
     color: white !important;
@@ -49,7 +37,7 @@ p {
     padding: 10px 18px;
     font-size: 16px;
     border: none;
-    transition: 0.2s;
+    transition: 0.2s ease-in-out;
 }
 
 .stButton > button:hover {
@@ -61,8 +49,16 @@ p {
 div[data-testid="stFileUploader"] {
     background-color: white;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid #e5e7eb;
+}
+
+/* Metrics */
+[data-testid="metric-container"] {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
 }
 
 /* Dataframe */
@@ -71,22 +67,36 @@ div[data-testid="stFileUploader"] {
     border-radius: 10px;
 }
 
-/* Metrics cards */
-[data-testid="metric-container"] {
-    background-color: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+/* Remove weird white-on-white issues */
+h1, h2, h3, p {
+    color: #0f172a !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# TITLE
+# PROFESSIONAL HEADING
 # -----------------------------
-st.title("🦟 Dengue Detection System")
-st.write("Upload CBC CSV file to predict dengue infection risk.")
+st.markdown("""
+<h1 style="
+    text-align:center;
+    font-weight:900;
+    font-size:36px;
+    margin-bottom:5px;
+    color:#0f172a;">
+    🦟 Dengue Infection Risk Prediction System
+</h1>
+
+<p style="
+    text-align:center;
+    font-size:16px;
+    color:#475569;
+    margin-top:0px;">
+    Machine Learning–Based Clinical Decision Support Tool Using Complete Blood Count (CBC) Parameters<br>
+    for Early Detection and Risk Stratification of Dengue Infection
+</p>
+""", unsafe_allow_html=True)
 
 # -----------------------------
 # FEATURES
@@ -129,22 +139,22 @@ if model is None:
     st.stop()
 
 # -----------------------------
-# UPLOAD CSV
+# UPLOAD FILE
 # -----------------------------
 uploaded_file = st.file_uploader("Upload CBC CSV File", type=["csv"])
 
 # -----------------------------
-# PREDICTION
+# PROCESS & PREDICT
 # -----------------------------
 if uploaded_file is not None:
 
     df = pd.read_csv(uploaded_file)
 
-    # Drop unnecessary columns
+    # Remove unwanted columns
     drop_cols = ["Serial", "Date", "Result"]
     df.drop(columns=[c for c in drop_cols if c in df.columns], inplace=True)
 
-    # Convert Gender
+    # Gender encoding
     if "Gender" in df.columns:
         df["Gender_Male"] = df["Gender"].map({
             "Male": 1,
@@ -154,11 +164,11 @@ if uploaded_file is not None:
         })
         df.drop(columns=["Gender"], inplace=True)
 
-    # Check missing features
+    # Validate columns
     missing = [col for col in FEATURES if col not in df.columns]
 
     if missing:
-        st.error(f"Missing columns: {missing}")
+        st.error(f"Missing required columns: {missing}")
         st.stop()
 
     # Fill missing values
@@ -166,9 +176,9 @@ if uploaded_file is not None:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(MEDIANS[col])
 
     # -----------------------------
-    # PREDICT BUTTON
+    # PREDICTION BUTTON
     # -----------------------------
-    if st.button("🔍 Predict Dengue Risk"):
+    if st.button("🔍 Run Dengue Risk Prediction"):
 
         X = df[FEATURES]
 
@@ -177,30 +187,31 @@ if uploaded_file is not None:
 
         results = pd.DataFrame({
             "Prediction": [
-                "🟥 Positive" if p == 1 else "🟩 Negative"
+                "🟥 High Risk (Positive)" if p == 1 else "🟩 Low Risk (Negative)"
                 for p in preds
             ],
-            "Probability (%)": [
+            "Risk Probability (%)": [
                 round(float(p) * 100, 2)
                 for p in probs
             ]
         })
 
-        st.subheader("Prediction Results")
+        # Results table
+        st.subheader("📊 Prediction Results")
         st.dataframe(results, use_container_width=True)
 
         # -----------------------------
-        # SUMMARY
+        # SUMMARY DASHBOARD
         # -----------------------------
         positive = int(preds.sum())
         negative = len(preds) - positive
 
-        st.subheader("Summary")
+        st.subheader("📌 Patient Summary Overview")
 
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Patients", len(preds))
-        col2.metric("Positive Cases", positive)
-        col3.metric("Negative Cases", negative)
+        col2.metric("High Risk Cases", positive)
+        col3.metric("Low Risk Cases", negative)
 
         # -----------------------------
         # DOWNLOAD
@@ -208,9 +219,9 @@ if uploaded_file is not None:
         csv = results.to_csv(index=False).encode("utf-8")
 
         st.download_button(
-            "⬇ Download Results",
+            "⬇ Download Prediction Report",
             csv,
-            "dengue_results.csv",
+            "dengue_risk_report.csv",
             "text/csv"
         )
 
@@ -218,4 +229,4 @@ if uploaded_file is not None:
 # FOOTER
 # -----------------------------
 st.markdown("---")
-st.caption("⚠ Research purpose only — Not a medical diagnosis tool")
+st.caption("⚠ For research and educational purposes only. Not a substitute for medical diagnosis.")
